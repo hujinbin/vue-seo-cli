@@ -1,4 +1,9 @@
 # vue-seo-cli
+使用webpack 5.28.0 版本的脚手架
+
+生成纯静态html页面帮助seo优化
+
+基于@vue/cli 4.5.8 版本构建，已将webpack3.6.0升级到5.28.0
 
 > A Vue.js project
 
@@ -22,6 +27,21 @@ npm run unit
 
 # run all tests
 npm test
+
+# 自动生成用于seo的静态html文件
+npm run seo
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+###  线上案例
+
+https://coupon.leheavengame.com/
+
+seo页面  ->  真实路径
+https://coupon.leheavengame.com/m/index.html     ->    https://coupon.leheavengame.com/
+https://coupon.leheavengame.com/m/pdd.html     ->    https://coupon.leheavengame.com/#/pdd
+https://coupon.leheavengame.com/m/jd.html     ->    https://coupon.leheavengame.com/#/jd
+https://coupon.leheavengame.com/m/user.html     ->    https://coupon.leheavengame.com/#/user
+
+
+

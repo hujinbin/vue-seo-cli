@@ -100,6 +100,11 @@ module.exports = {
     //   })
     new VueLoaderPlugin(),
   ],
+  optimization: {
+    chunkIds: "deterministic",
+    moduleIds: "deterministic",
+    mangleExports: "deterministic"
+  },
   target: ['web', 'es5'],
   // node: {
   //   // prevent webpack from injecting useless setImmediate polyfill because Vue
