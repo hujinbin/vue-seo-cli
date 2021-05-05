@@ -8,12 +8,43 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MinCssExtractPlugin = require('mini-css-extract-plugin')
-const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+// const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
+// const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : require('../config/prod.env')
+
+
+  // 根据路由导出页面
+  const merge = require("webpack-merge");
+  const buildNanme = process.env.route;
+  const buildList = {
+    index: path.resolve(__dirname, `../../vueClinicWeb/${process.env.route}/index.html`),
+    assetsRoot: path.resolve(__dirname, `../../vueClinicWeb/${process.env.route}`),
+    assetsSubDirectory: "./static",
+    assetsPublicPath: `../../vueClinicWeb/${process.env.route}`,
+    productionSourceMap: false,
+    devtool: "#source-map",
+    productionGzip: false,
+    productionGzipExtensions: ["js", "css"],
+    bundleAnalyzerReport: process.env.npm_config_report
+  };
+  let buildRouteConfig = {};
+  buildRouteConfig[buildNanme] = buildList;
+  module.exports = merge(buildRouteConfig, {
+    dev: {// 此处省略
+    },
+   
+    build: merge(buildList, {
+      index: path.resolve(__dirname, "../dist/index.html"),
+      assetsRoot: path.resolve(__dirname, "../dist")
+    })
+  });
+  
+ // 根据路由导出页面
+
+
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -29,99 +60,99 @@ const webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
-  // plugins: [
+  plugins: [
   //   // http://vuejs.github.io/vue-loader/en/workflow/production.html
-  //   new webpack.DefinePlugin({
-  //     'process.env': env
-  //   }),
-  //   new UglifyJsPlugin({
-  //     uglifyOptions: {
-  //       compress: {
-  //         warnings: false
-  //       }
-  //     },
-  //     sourceMap: config.build.productionSourceMap,
-  //     parallel: true
-  //   }),
+    // new webpack.DefinePlugin({
+    //   'process.env': env
+    // }),
+    // new UglifyJsPlugin({
+    //   uglifyOptions: {
+    //     compress: {
+    //       warnings: false
+    //     }
+    //   },
+    //   sourceMap: config.build.productionSourceMap,
+    //   parallel: true
+    // }),
   //   // extract css into its own file
-  //   new MinCssExtractPlugin({
-  //     filename: utils.assetsPath('css/[name].[contenthash].css'),
-  //     // Setting the following option to `false` will not extract CSS from codesplit chunks.
-  //     // Their CSS will instead be inserted dynamically with style-loader when the codesplit chunk has been loaded by webpack.
-  //     // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`, 
-  //     // increasing file size: https://github.com/vuejs-templates/webpack/issues/1110
-  //   }),
-  //   // Compress extracted CSS. We are using this plugin so that possible
-  //   // duplicated CSS from different components can be deduped.
-  //   new OptimizeCSSPlugin({
-  //     cssProcessorOptions: config.build.productionSourceMap
-  //       ? { safe: true, map: { inline: false } }
-  //       : { safe: true }
-  //   }),
-  //   // generate dist index.html with correct asset hash for caching.
-  //   // you can customize output by editing /index.html
-  //   // see https://github.com/ampedandwired/html-webpack-plugin
-  //   new HtmlWebpackPlugin({
-  //     filename: process.env.NODE_ENV === 'testing'
-  //       ? 'index.html'
-  //       : config.build.index,
-  //     template: 'index.html',
-  //     inject: true,
-  //     minify: {
-  //       removeComments: true,
-  //       collapseWhitespace: true,
-  //       removeAttributeQuotes: true
-  //       // more options:
-  //       // https://github.com/kangax/html-minifier#options-quick-reference
-  //     },
-  //     // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-  //     chunksSortMode: 'dependency'
-  //   }),
-  //   // keep module.id stable when vendor modules does not change
-  //   // new webpack.HashedModuleIdsPlugin(),
-  //   // enable scope hoisting
-  //   new webpack.optimize.ModuleConcatenationPlugin(),
-  //   // split vendor js into its own file
-  //   // new webpack.optimize.CommonsChunkPlugin({
-  //   //   name: 'vendor',
-  //   //   minChunks (module) {
-  //   //     // any required modules inside node_modules are extracted to vendor
-  //   //     return (
-  //   //       module.resource &&
-  //   //       /\.js$/.test(module.resource) &&
-  //   //       module.resource.indexOf(
-  //   //         path.join(__dirname, '../node_modules')
-  //   //       ) === 0
-  //   //     )
-  //   //   }
-  //   // }),
-  //   // // extract webpack runtime and module manifest to its own file in order to
-  //   // // prevent vendor hash from being updated whenever app bundle is updated
-  //   // new webpack.optimize.CommonsChunkPlugin({
-  //   //   name: 'manifest',
-  //   //   minChunks: Infinity
-  //   // }),
-  //   // // This instance extracts shared chunks from code splitted chunks and bundles them
-  //   // // in a separate chunk, similar to the vendor chunk
-  //   // // see: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
-  //   // new webpack.optimize.CommonsChunkPlugin({
-  //   //   name: 'app',
-  //   //   async: 'vendor-async',
-  //   //   children: true,
-  //   //   minChunks: 3
-  //   // }),
+    new MinCssExtractPlugin({
+      filename: utils.assetsPath('css/[name].[contenthash].css'),
+      // Setting the following option to `false` will not extract CSS from codesplit chunks.
+      // Their CSS will instead be inserted dynamically with style-loader when the codesplit chunk has been loaded by webpack.
+      // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`, 
+      // increasing file size: https://github.com/vuejs-templates/webpack/issues/1110
+    }),
+    // Compress extracted CSS. We are using this plugin so that possible
+    // duplicated CSS from different components can be deduped.
+    // new OptimizeCSSPlugin({
+    //   cssProcessorOptions: config.build.productionSourceMap
+    //     ? { safe: true, map: { inline: false } }
+    //     : { safe: true }
+    // }),
+    // generate dist index.html with correct asset hash for caching.
+    // you can customize output by editing /index.html
+    // see https://github.com/ampedandwired/html-webpack-plugin
+    new HtmlWebpackPlugin({
+      filename: process.env.NODE_ENV === 'testing'
+        ? 'index.html'
+        : config.build.index,
+      template: 'index.html',
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'manual'
+    }),
+    // keep module.id stable when vendor modules does not change
+    // new webpack.HashedModuleIdsPlugin(),
+    // enable scope hoisting
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    // split vendor js into its own file
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendor',
+    //   minChunks (module) {
+    //     // any required modules inside node_modules are extracted to vendor
+    //     return (
+    //       module.resource &&
+    //       /\.js$/.test(module.resource) &&
+    //       module.resource.indexOf(
+    //         path.join(__dirname, '../node_modules')
+    //       ) === 0
+    //     )
+    //   }
+    // }),
+    // // extract webpack runtime and module manifest to its own file in order to
+    // // prevent vendor hash from being updated whenever app bundle is updated
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'manifest',
+    //   minChunks: Infinity
+    // }),
+    // // This instance extracts shared chunks from code splitted chunks and bundles them
+    // // in a separate chunk, similar to the vendor chunk
+    // // see: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'app',
+    //   async: 'vendor-async',
+    //   children: true,
+    //   minChunks: 3
+    // }),
 
-  //   // copy custom static assets
-  //   new CopyWebpackPlugin({
-  //     patterns:[
-  //       {
-  //         from: path.resolve(__dirname, '../static'),
-  //         to: config.build.assetsSubDirectory,
-  //         // ignore: ['.*']
-  //       }
-  //     ]
-  //   })
-  // ]
+    // copy custom static assets
+    new CopyWebpackPlugin({
+      patterns:[
+        {
+          from: path.resolve(__dirname, '../static'),
+          to: config.build.assetsSubDirectory,
+          // ignore: ['.*']
+        }
+      ]
+    })
+  ]
 })
 
 if (config.build.productionGzip) {
