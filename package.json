@@ -11,7 +11,7 @@
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit",
     "build": "node build/build.js",
-    "seo": "node build/build.js"
+    "seo": "node build/seo.js"
   },
   "dependencies": {
     "vue": "^2.6.12",
@@ -52,6 +52,7 @@
     "postcss-import": "^11.0.0",
     "postcss-loader": "^5.2.0",
     "postcss-url": "^7.2.1",
+    "prerender-spa-plugin": "^3.4.0",
     "rimraf": "^2.6.0",
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",

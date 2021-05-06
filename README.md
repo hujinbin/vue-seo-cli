@@ -37,7 +37,10 @@ npm run seo
 
 https://coupon.leheavengame.com/
 
+
+
 seo页面  ->  真实路径
+
 https://coupon.leheavengame.com/m/index.html     ->    https://coupon.leheavengame.com/
 https://coupon.leheavengame.com/m/pdd.html     ->    https://coupon.leheavengame.com/#/pdd
 https://coupon.leheavengame.com/m/jd.html     ->    https://coupon.leheavengame.com/#/jd

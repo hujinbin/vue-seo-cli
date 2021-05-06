@@ -8,42 +8,15 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MinCssExtractPlugin = require('mini-css-extract-plugin')
+
+// seo输出
+const PrerenderSpaPlugin = require('prerender-spa-plugin')
 // const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : require('../config/prod.env')
-
-
-  // 根据路由导出页面
-  const merge = require("webpack-merge");
-  const buildNanme = process.env.route;
-  const buildList = {
-    index: path.resolve(__dirname, `../../vueClinicWeb/${process.env.route}/index.html`),
-    assetsRoot: path.resolve(__dirname, `../../vueClinicWeb/${process.env.route}`),
-    assetsSubDirectory: "./static",
-    assetsPublicPath: `../../vueClinicWeb/${process.env.route}`,
-    productionSourceMap: false,
-    devtool: "#source-map",
-    productionGzip: false,
-    productionGzipExtensions: ["js", "css"],
-    bundleAnalyzerReport: process.env.npm_config_report
-  };
-  let buildRouteConfig = {};
-  buildRouteConfig[buildNanme] = buildList;
-  module.exports = merge(buildRouteConfig, {
-    dev: {// 此处省略
-    },
-   
-    build: merge(buildList, {
-      index: path.resolve(__dirname, "../dist/index.html"),
-      assetsRoot: path.resolve(__dirname, "../dist")
-    })
-  });
-  
- // 根据路由导出页面
-
 
 
 const webpackConfig = merge(baseWebpackConfig, {
@@ -141,7 +114,13 @@ const webpackConfig = merge(baseWebpackConfig, {
     //   children: true,
     //   minChunks: 3
     // }),
-
+    
+    new PrerenderSpaPlugin(
+      // 编译后的html需要存放的路径
+      path.join(__dirname, '../dist'),
+      // 列出哪些路由需要预渲染
+      [ '/', '/about', '/contact' ]
+    ),
     // copy custom static assets
     new CopyWebpackPlugin({
       patterns:[
