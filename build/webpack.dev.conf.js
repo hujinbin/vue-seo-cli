@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const config = require('../config')
 const merge = require('webpack-merge')
 const path = require('path')
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -17,6 +18,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
   },
+  mode: 'development',
+  // stats: "errors-only",
   // cheap-module-eval-source-map is faster for development
   devtool: config.dev.devtool,
 
@@ -29,6 +32,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       ],
     },
     hot: true,
+    liveReload: true,
     contentBase: false, // since we use CopyWebpackPlugin.
     compress: true,
     host: HOST || config.dev.host,
@@ -65,11 +69,9 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           to: config.dev.assetsSubDirectory,
         }
       ]
-    })
-  ],
-  optimization:{
-    moduleIds:'named',
-  }
+    }),
+    new CleanWebpackPlugin(),
+  ]
 })
 
 module.exports = new Promise((resolve, reject) => {
