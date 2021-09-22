@@ -34,19 +34,6 @@ const webpackConfig = merge(baseWebpackConfig, {
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
   plugins: [
-  //   // http://vuejs.github.io/vue-loader/en/workflow/production.html
-    // new webpack.DefinePlugin({
-    //   'process.env': env
-    // }),
-    // new UglifyJsPlugin({
-    //   uglifyOptions: {
-    //     compress: {
-    //       warnings: false
-    //     }
-    //   },
-    //   sourceMap: config.build.productionSourceMap,
-    //   parallel: true
-    // }),
   //   // extract css into its own file
     new MinCssExtractPlugin({
       filename: utils.assetsPath('css/[name].[contenthash].css'),

@@ -4,7 +4,9 @@ const webpack = require('webpack')
 const config = require('../config')
 const merge = require('webpack-merge')
 const path = require('path')
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const {
+  CleanWebpackPlugin
+} = require("clean-webpack-plugin");
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -16,7 +18,10 @@ const PORT = process.env.PORT && Number(process.env.PORT)
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
-    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
+    rules: utils.styleLoaders({
+      sourceMap: config.dev.cssSourceMap,
+      usePostCSS: true
+    })
   },
   mode: 'development',
   // stats: "errors-only",
@@ -27,9 +32,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   devServer: {
     clientLogLevel: 'warning',
     historyApiFallback: {
-      rewrites: [
-        { from: /.*/, to: path.posix.join(config.dev.assetsPublicPath, 'index.html') },
-      ],
+      rewrites: [{
+        from: /.*/,
+        to: path.posix.join(config.dev.assetsPublicPath, 'index.html')
+      }, ],
     },
     hot: true,
     liveReload: true,
@@ -38,15 +44,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     host: HOST || config.dev.host,
     port: PORT || config.dev.port,
     open: config.dev.autoOpenBrowser,
-    overlay: config.dev.errorOverlay
-      ? { warnings: false, errors: true }
-      : false,
+    overlay: config.dev.errorOverlay ?
+      {
+        warnings: false,
+        errors: true
+      } :
+      false,
     publicPath: config.dev.assetsPublicPath,
     proxy: config.dev.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
     }
+  },
+  // 5特有的文件监听
+  watchOptions: {
+    //默认为空，不监听的⽂件或者⽬录，⽀持正则
+    ignored: /node_modules/,
+    //监听到⽂件变化后，等300ms再去执⾏，默认300ms,
+    aggregateTimeout: 300,
+    poll: config.dev.poll,
+  },
+  // 5新增性能优化
+  performance: {
+    maxEntrypointSize: 4000000, // 入口起点的最大体积，控制 webpack 何时生成性能提示
+    maxAssetSize: 1000000, //单个资源体积(单位: bytes)，控制 webpack 何时生成性能提示
   },
   plugins: [
     // new webpack.DefinePlugin({
@@ -63,12 +85,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     }),
     // copy custom static assets
     new CopyWebpackPlugin({
-      patterns:[
-        {
-          from: path.resolve(__dirname, '../static'),
-          to: config.dev.assetsSubDirectory,
-        }
-      ]
+      patterns: [{
+        from: path.resolve(__dirname, '../static'),
+        to: config.dev.assetsSubDirectory,
+      }]
     }),
     new CleanWebpackPlugin(),
   ]
@@ -90,9 +110,9 @@ module.exports = new Promise((resolve, reject) => {
         compilationSuccessInfo: {
           messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
         },
-        onErrors: config.dev.notifyOnErrors
-        ? utils.createNotifierCallback()
-        : undefined
+        onErrors: config.dev.notifyOnErrors ?
+          utils.createNotifierCallback() :
+          undefined
       }))
 
       resolve(devWebpackConfig)
