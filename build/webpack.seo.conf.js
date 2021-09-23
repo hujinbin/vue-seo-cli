@@ -11,12 +11,13 @@ const MinCssExtractPlugin = require('mini-css-extract-plugin')
 
 // seo输出
 const PrerenderSpaPlugin = require('prerender-spa-plugin')
+const Renderer = PrerenderSpaPlugin.PuppeteerRenderer;
 // const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
-const env = process.env.NODE_ENV === 'testing'
-  ? require('../config/test.env')
-  : require('../config/prod.env')
+const env = process.env.NODE_ENV === 'testing' ?
+  require('../config/test.env') :
+  require('../config/prod.env')
 
 
 const webpackConfig = merge(baseWebpackConfig, {
@@ -34,7 +35,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
   plugins: [
-  //   // extract css into its own file
+    //   // extract css into its own file
     new MinCssExtractPlugin({
       filename: utils.assetsPath('css/[name].[contenthash].css'),
       // Setting the following option to `false` will not extract CSS from codesplit chunks.
@@ -53,9 +54,9 @@ const webpackConfig = merge(baseWebpackConfig, {
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
-      filename: process.env.NODE_ENV === 'testing'
-        ? 'index.html'
-        : config.build.index,
+      filename: process.env.NODE_ENV === 'testing' ?
+        'index.html' :
+        config.build.index,
       template: 'index.html',
       inject: true,
       minify: {
@@ -101,22 +102,41 @@ const webpackConfig = merge(baseWebpackConfig, {
     //   children: true,
     //   minChunks: 3
     // }),
-    
-    new PrerenderSpaPlugin(
+
+    new PrerenderSpaPlugin({
       // 编译后的html需要存放的路径
-      path.join(__dirname, '../seo'),
+      staticDir: path.join(__dirname, '../dist'),
+
+      // 对应自己的路由文件，比如a有参数，就需要写成 /a/param1。这里直接对照自己的router修改！！！
+      routes: ['/'],
       // 列出哪些路由需要预渲染
-      [ '/', '/about', '/contact' ]
-    ),
+      // 预渲染代理接口
+      server: {
+        proxy: {
+          // '/api': {
+          //   target: 'http://localhost:8080',
+          //   secure: false
+          // }
+        }
+      },
+
+      // 这个很重要，如果没有配置这段，也不会进行预编译
+      renderer: new Renderer({
+        inject: {
+          foo: 'bar'
+        },
+        headless: false, //这个必须有
+        // 在 main.js 中 document.dispatchEvent(new Event('render-event'))，两者的事件名称要对应上。
+        renderAfterDocumentEvent: 'render-event'
+      })
+    }),
     // copy custom static assets
     new CopyWebpackPlugin({
-      patterns:[
-        {
-          from: path.resolve(__dirname, '../static'),
-          to: config.build.assetsSubDirectory,
-          // ignore: ['.*']
-        }
-      ]
+      patterns: [{
+        from: path.resolve(__dirname, '../static'),
+        to: config.build.assetsSubDirectory,
+        // ignore: ['.*']
+      }]
     })
   ]
 })
