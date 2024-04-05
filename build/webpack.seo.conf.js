@@ -19,8 +19,48 @@ const env = process.env.NODE_ENV === 'testing' ?
   require('../config/test.env') :
   require('../config/prod.env')
 
+  // 动态计算多页面打包
+const setMPA = () => {
+  const entry = {};
+  const htmlWebpackPlugins = [];
+  // 获取本地按规则修改好的文件
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+
+  Object.keys(entryFiles).map((index) => {
+      const entryFile = entryFiles[index];
+      // 'my-project/src/index/index.js'
+      const match = entryFile.match(/src\/(.*)\/index\.js/);
+      // 获取页面文件名
+      const pageName = match && match[1];
+      entry[pageName] = entryFile;
+      // 根据本地定义的页面文件数量来定义htmlWebpackPlugin
+      htmlWebpackPlugins.push(
+          new HtmlWebpackPlugin({
+              template: path.join(__dirname, `src/${pageName}/index.html`),
+              filename: `${pageName}.html`,
+              chunks: [pageName],
+              inject: true,
+              minify: {
+                  html5: true,
+                  collapseWhitespace: true,
+                  preserveLineBreaks: false,
+                  minifyCSS: true,
+                  minifyJS: true,
+                  removeComments: false
+              }
+          })
+      );
+  });
+
+  return {
+      entry,
+      htmlWebpackPlugins
+  }
+}
+const { entry, htmlWebpackPlugins } = setMPA();
 
 const webpackConfig = merge(baseWebpackConfig, {
+  entry: entry,
   module: {
     rules: utils.styleLoaders({
       sourceMap: config.build.productionSourceMap,
@@ -138,7 +178,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         // ignore: ['.*']
       }]
     })
-  ]
+  ].concat(htmlWebpackPlugins),
 })
 
 if (config.build.productionGzip) {
