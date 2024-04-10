@@ -19,48 +19,7 @@ const env = process.env.NODE_ENV === 'testing' ?
   require('../config/test.env') :
   require('../config/prod.env')
 
-  // 动态计算多页面打包
-const setMPA = () => {
-  const entry = {};
-  const htmlWebpackPlugins = [];
-  // 获取本地按规则修改好的文件
-  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
-
-  Object.keys(entryFiles).map((index) => {
-      const entryFile = entryFiles[index];
-      // 'my-project/src/index/index.js'
-      const match = entryFile.match(/src\/(.*)\/index\.js/);
-      // 获取页面文件名
-      const pageName = match && match[1];
-      entry[pageName] = entryFile;
-      // 根据本地定义的页面文件数量来定义htmlWebpackPlugin
-      htmlWebpackPlugins.push(
-          new HtmlWebpackPlugin({
-              template: path.join(__dirname, `src/${pageName}/index.html`),
-              filename: `${pageName}.html`,
-              chunks: [pageName],
-              inject: true,
-              minify: {
-                  html5: true,
-                  collapseWhitespace: true,
-                  preserveLineBreaks: false,
-                  minifyCSS: true,
-                  minifyJS: true,
-                  removeComments: false
-              }
-          })
-      );
-  });
-
-  return {
-      entry,
-      htmlWebpackPlugins
-  }
-}
-const { entry, htmlWebpackPlugins } = setMPA();
-
 const webpackConfig = merge(baseWebpackConfig, {
-  entry: entry,
   module: {
     rules: utils.styleLoaders({
       sourceMap: config.build.productionSourceMap,
@@ -93,22 +52,22 @@ const webpackConfig = merge(baseWebpackConfig, {
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: process.env.NODE_ENV === 'testing' ?
-        'index.html' :
-        config.build.index,
-      template: 'index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'manual'
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: process.env.NODE_ENV === 'testing' ?
+    //     'index.html' :
+    //     config.build.index,
+    //   template: 'index.html',
+    //   inject: true,
+    //   minify: {
+    //     removeComments: true,
+    //     collapseWhitespace: true,
+    //     removeAttributeQuotes: true
+    //     // more options:
+    //     // https://github.com/kangax/html-minifier#options-quick-reference
+    //   },
+    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    //   chunksSortMode: 'manual'
+    // }),
     // keep module.id stable when vendor modules does not change
     // new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
@@ -144,29 +103,57 @@ const webpackConfig = merge(baseWebpackConfig, {
     // }),
 
     new PrerenderSpaPlugin({
-      // 编译后的html需要存放的路径
+      // Required - The path to the webpack-outputted app to prerender.
       staticDir: path.join(__dirname, '../dist'),
 
-      // 对应自己的路由文件，比如a有参数，就需要写成 /a/param1。这里直接对照自己的router修改！！！
-      routes: ['/'],
-      // 列出哪些路由需要预渲染
-      // 预渲染代理接口
-      server: {
-        proxy: {
-          // '/api': {
-          //   target: 'http://localhost:8080',
-          //   secure: false
-          // }
+      // Optional - The path your rendered app should be output to.
+      // (Defaults to staticDir.)
+      outputDir: path.join(__dirname, '../prerendered'),
+
+      // Optional - The location of index.html
+      indexPath: path.join(__dirname, '../dist', 'index.html'),
+
+      // Required - Routes to render.
+      routes: [ '/', '/about' ],
+
+      // Optional - Allows you to customize the HTML and output path before
+      // writing the rendered contents to a file.
+      // renderedRoute can be modified and it or an equivelant should be returned.
+      // renderedRoute format:
+      // {
+      //   route: String, // Where the output file will end up (relative to outputDir)
+      //   originalRoute: String, // The route that was passed into the renderer, before redirects.
+      //   html: String, // The rendered HTML for this route.
+      //   outputPath: String // The path the rendered HTML will be written to.
+      // }
+      postProcess (renderedRoute) {
+        // Ignore any redirects.
+        renderedRoute.route = renderedRoute.originalRoute
+        // Basic whitespace removal. (Don't use this in production.)
+        renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><')
+        // Remove /index.html from the output path if the dir name ends with a .html file extension.
+        // For example: /dist/dir/special.html/index.html -> /dist/dir/special.html
+        if (renderedRoute.route.endsWith('.html')) {
+          renderedRoute.outputPath = path.join(__dirname, '../dist', renderedRoute.route)
         }
+
+        return renderedRoute
       },
 
-      // 这个很重要，如果没有配置这段，也不会进行预编译
+      // Optional - Uses html-minifier (https://github.com/kangax/html-minifier)
+      // To minify the resulting HTML.
+      // Option reference: https://github.com/kangax/html-minifier#options-quick-reference
+      minify: {
+        collapseBooleanAttributes: true,
+        collapseWhitespace: true,
+        decodeEntities: true,
+        keepClosingSlash: true,
+        sortAttributes: true
+      },
       renderer: new Renderer({
         inject: {
           foo: 'bar'
         },
-        headless: false, //这个必须有
-        // 在 main.js 中 document.dispatchEvent(new Event('render-event'))，两者的事件名称要对应上。
         renderAfterDocumentEvent: 'render-event'
       })
     }),
@@ -178,7 +165,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         // ignore: ['.*']
       }]
     })
-  ].concat(htmlWebpackPlugins),
+  ],
 })
 
 if (config.build.productionGzip) {

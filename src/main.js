@@ -11,5 +11,8 @@ new Vue({
   el: '#app',
   router,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  mounted() {
+    document.dispatchEvent(new Event('render-event'))
+  }
 })
