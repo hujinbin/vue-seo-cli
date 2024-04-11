@@ -52,22 +52,23 @@ const webpackConfig = merge(baseWebpackConfig, {
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
-    // new HtmlWebpackPlugin({
-    //   filename: process.env.NODE_ENV === 'testing' ?
-    //     'index.html' :
-    //     config.build.index,
-    //   template: 'index.html',
-    //   inject: true,
-    //   minify: {
-    //     removeComments: true,
-    //     collapseWhitespace: true,
-    //     removeAttributeQuotes: true
-    //     // more options:
-    //     // https://github.com/kangax/html-minifier#options-quick-reference
-    //   },
-    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-    //   chunksSortMode: 'manual'
-    // }),
+    new HtmlWebpackPlugin({
+      filename: process.env.NODE_ENV === 'testing' ?
+        'index.html' :
+        config.build.index,
+      template: 'index.html',
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      chunks: ['manifest','vendor', 'app'],
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'manual'
+    }),
     // keep module.id stable when vendor modules does not change
     // new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
@@ -105,56 +106,15 @@ const webpackConfig = merge(baseWebpackConfig, {
     new PrerenderSpaPlugin({
       // Required - The path to the webpack-outputted app to prerender.
       staticDir: path.join(__dirname, '../dist'),
-
-      // Optional - The path your rendered app should be output to.
-      // (Defaults to staticDir.)
-      outputDir: path.join(__dirname, '../prerendered'),
-
-      // Optional - The location of index.html
-      indexPath: path.join(__dirname, '../dist', 'index.html'),
-
       // Required - Routes to render.
-      routes: [ '/', '/about' ],
-
-      // Optional - Allows you to customize the HTML and output path before
-      // writing the rendered contents to a file.
-      // renderedRoute can be modified and it or an equivelant should be returned.
-      // renderedRoute format:
-      // {
-      //   route: String, // Where the output file will end up (relative to outputDir)
-      //   originalRoute: String, // The route that was passed into the renderer, before redirects.
-      //   html: String, // The rendered HTML for this route.
-      //   outputPath: String // The path the rendered HTML will be written to.
-      // }
-      postProcess (renderedRoute) {
-        // Ignore any redirects.
-        renderedRoute.route = renderedRoute.originalRoute
-        // Basic whitespace removal. (Don't use this in production.)
-        renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><')
-        // Remove /index.html from the output path if the dir name ends with a .html file extension.
-        // For example: /dist/dir/special.html/index.html -> /dist/dir/special.html
-        if (renderedRoute.route.endsWith('.html')) {
-          renderedRoute.outputPath = path.join(__dirname, '../dist', renderedRoute.route)
-        }
-
-        return renderedRoute
-      },
-
-      // Optional - Uses html-minifier (https://github.com/kangax/html-minifier)
-      // To minify the resulting HTML.
-      // Option reference: https://github.com/kangax/html-minifier#options-quick-reference
-      minify: {
-        collapseBooleanAttributes: true,
-        collapseWhitespace: true,
-        decodeEntities: true,
-        keepClosingSlash: true,
-        sortAttributes: true
-      },
+      routes: ['/', '/about' ],
       renderer: new Renderer({
         inject: {
           foo: 'bar'
         },
-        renderAfterDocumentEvent: 'render-event'
+        headless: true,
+        renderAfterDocumentEvent: 'render-event',
+        captureAfterTime: 5, //单位秒
       })
     }),
     // copy custom static assets
