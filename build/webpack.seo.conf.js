@@ -105,15 +105,18 @@ const webpackConfig = merge(baseWebpackConfig, {
 
     new PrerenderSpaPlugin({
       // Required - The path to the webpack-outputted app to prerender.
-      staticDir: path.join(__dirname, '../dist'),
+      indexPath: path.join(__dirname, '../dist/index.html'),
+      staticDir: path.resolve(__dirname, '../dist'),
+      outputDir: path.join(__dirname, '../dist/vue'),
       // Required - Routes to render.
       routes: ['/', '/about' ],
       renderer: new Renderer({
         inject: {
           foo: 'bar'
         },
-        headless: true,
+        headless: false,
         renderAfterDocumentEvent: 'render-event',
+        renderAfterTime: 5000,
         captureAfterTime: 5, //单位秒
       })
     }),
